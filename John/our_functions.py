@@ -78,6 +78,9 @@ def find_components(adjacency):
     
     return components
 
+def num_nodes(adjacency):
+    '''outputs the number of nodes in a graph given that it is connected'''
+    return np.count_nonzero(np.sum(adjacency, axis=1))
 
 def find_largest_component(components):
     '''Takes the list of all components as input (output of find_components)
