@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def connected_graph(adjacency):
     """Determines whether a graph is connected.
@@ -241,3 +242,64 @@ def compute_clustering_coefficient(adjacency, node):
     
     
     return float(clustering_coefficient)
+
+
+def get_true_labels():
+
+    # First we want to get the true labels on the nodes
+    file_path1 = '../data/TerroristRel/TerroristRel.edges'
+    file_path2 = '../data/TerroristRel/TerroristRel.labels'
+    file_path3 = '../data/TerroristRel/TerroristRel_Colleague.nodes'
+    file_path4 = '../data/TerroristRel/TerroristRel_Congregate.nodes'
+    file_path5 = '../data/TerroristRel/TerroristRel_Contact.nodes'
+    file_path6 = '../data/TerroristRel/TerroristRel_Family.nodes'
+
+    terrorist_rel_labels = pd.read_csv(file_path2, header=None)
+
+        # Parse using tab and space delimiters
+    terrorist_rel_coll = pd.read_csv(file_path3, sep='\t|' '', header=None)
+
+        # Parse using tab and space delimiters
+    terrorist_rel_cong = pd.read_csv(file_path4, sep='\t|' '', header=None)
+
+        # Parse using tab and space delimiters
+    terrorist_rel_cont = pd.read_csv(file_path5, sep='\t|' '', header=None)
+
+        # Parse using tab and space delimiters
+    terrorist_rel_fam = pd.read_csv(file_path6, sep='\t|' '', header=None)
+
+    l1 = list(terrorist_rel_fam.loc[terrorist_rel_fam[1225]=='family'].index)
+    l2 = list(terrorist_rel_coll.loc[terrorist_rel_coll[1225]=='colleague'].index)
+    l3 = list(terrorist_rel_cont.loc[terrorist_rel_cont[1225]=='contact'].index)
+    l4 = list(terrorist_rel_cong.loc[terrorist_rel_cong[1225]=='congregate'].index)
+
+    l_tot = list(range(851))
+
+
+    t = pd.DataFrame(terrorist_rel_fam.iloc[:,1225], columns=['Nan'])
+    t['Col'] = terrorist_rel_coll.iloc[:, 1225]
+    t['Fam'] = terrorist_rel_fam.iloc[:, 1225]
+    t['Cong'] = terrorist_rel_cong.iloc[:, 1225]
+    t['Cont'] = terrorist_rel_cont.iloc[:, 1225]
+
+
+    d = {}
+    for i in range(851):
+        d[i] = 0
+    for i in list(t.loc[t['Fam'] == 'family'].index):
+        d[i] += 1000
+    for i in list(t.loc[t['Col'] == 'colleague'].index):
+        d[i] += 200
+    for i in list(t.loc[t['Cong'] == 'congregate'].index):
+        d[i] += 30
+    for i in list(t.loc[t['Cont'] == 'contact'].index):
+        d[i] += 4
+
+    zero_index = np.where(np.sum(A, axis=0) == 0)[0]
+    labs = []
+    for i in range(851):
+        if i not in zero_index:
+            labs.append(d[i])
+
+    labs = np.array(labs)
+    return labs
