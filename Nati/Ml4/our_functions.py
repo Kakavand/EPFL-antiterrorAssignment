@@ -291,19 +291,7 @@ def get_true_labels(A):
     d[list(t.loc[t['Col'] == 'colleague'].index)] += 200
     d[list(t.loc[t['Cong'] == 'congregate'].index)] += 30
     d[list(t.loc[t['Cont'] == 'contact'].index)] += 4
-    '''
-    d = {}
-    for i in range(851):
-        d[i] = 0
-    for i in list(t.loc[t['Fam'] == 'family'].index):
-        d[i] += 1000
-    for i in list(t.loc[t['Col'] == 'colleague'].index):
-        d[i] += 200
-    for i in list(t.loc[t['Cong'] == 'congregate'].index):
-        d[i] += 30
-    for i in list(t.loc[t['Cont'] == 'contact'].index):
-        d[i] += 4
-    '''
+ 
     zero_index = np.where(np.sum(A, axis=0) == 0)[0]
     d = np.delete(d, zero_index)
     '''
@@ -316,4 +304,5 @@ def get_true_labels(A):
     
     labs[labs!=0] = 1
     '''
+    d = [1 if d[i] > 0 else 0 for i in range(d.shape[0])]
     return d
