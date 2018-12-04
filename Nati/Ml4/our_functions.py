@@ -256,6 +256,8 @@ def get_true_labels(A):
     file_path5 = '../data/TerroristRel/TerroristRel_Contact.nodes'
     file_path6 = '../data/TerroristRel/TerroristRel_Family.nodes'
 
+    n_nodes = A.shape[0]
+    
     terrorist_rel_labels = pd.read_csv(file_path2, header=None)
 
         # Parse using tab and space delimiters
@@ -275,7 +277,7 @@ def get_true_labels(A):
     l3 = list(terrorist_rel_cont.loc[terrorist_rel_cont[1225]=='contact'].index)
     l4 = list(terrorist_rel_cong.loc[terrorist_rel_cong[1225]=='congregate'].index)
         
-    l_tot = list(range(851))
+    l_tot = list(range(n_nodes))
 
 
     t = pd.DataFrame(terrorist_rel_fam.iloc[:,1225], columns=['Nan'])
@@ -284,7 +286,12 @@ def get_true_labels(A):
     t['Cong'] = terrorist_rel_cong.iloc[:, 1225]
     t['Cont'] = terrorist_rel_cont.iloc[:, 1225]
 
-
+    d = np.zeros((n_nodes, 1))
+    d[list(t.loc[t['Fam'] == 'family'].index)] += 1000
+    d[list(t.loc[t['Col'] == 'colleague'].index)] += 200
+    d[list(t.loc[t['Cong'] == 'congregate'].index)] += 30
+    d[list(t.loc[t['Cont'] == 'contact'].index)] += 4
+    '''
     d = {}
     for i in range(851):
         d[i] = 0
@@ -296,14 +303,17 @@ def get_true_labels(A):
         d[i] += 30
     for i in list(t.loc[t['Cont'] == 'contact'].index):
         d[i] += 4
-
+    '''
     zero_index = np.where(np.sum(A, axis=0) == 0)[0]
+    d = np.delete(d, zero_index)
+    '''
     labs = []
-    for i in range(851):
+    for i in range(n_nodes):
         if i not in zero_index:
             labs.append(d[i])
 
     labs = np.array(labs)
     
     labs[labs!=0] = 1
-    return labs
+    '''
+    return d
