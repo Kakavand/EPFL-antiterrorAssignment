@@ -272,6 +272,28 @@ def get_true_labels(A):
         # Parse using tab and space delimiters
     terrorist_rel_fam = pd.read_csv(file_path6, sep='\t|' '', header=None, engine='python')
 
+    #keep id/label information and rename columns
+    colleague = terrorist_rel_coll[[0, 1225]]
+    family = terrorist_rel_fam[[0, 1225]]
+    congregate = terrorist_rel_cong[[0, 1225]]
+    contact = terrorist_rel_cont[[0, 1225]]
+    
+    #create table containing all labels for each node
+    colleague = colleague.set_index('url_id')
+    famility = familty.set_index('url_id')
+    congregate = congregate.set_index('url_id')
+    contact = contact.set_index('url_id')
+    #join to colleagues dataset since adjacency matrix was constructed based on its node ordering 
+    labeledNodes = colleague.join(family, on='url_id', lsuffix='_colleague', rsuffix='_family')
+    labeledNodes = labeledNodes.join(congregate, on='url_id', rsuffix='_congregate')
+    labeledNodes = labeledNodes.join(contact, on='url_id', lsuffix='_congregate', rsuffix='_contact')
+    labeledNodes.reset_index(level=0, inplace=True)
+    '''
+    colleague = colleague.rename(columns={0: 'url_id', 1225: 'label'})
+    family = family.rename(columns={0: 'url_id', 1225: 'label'})
+    congregate = congregate.rename(columns={0: 'url_id', 1225: 'label'})
+    contact = contact.rename(columns={0: 'url_id', 1225: 'label'})
+    
     l1 = list(terrorist_rel_fam.loc[terrorist_rel_fam[1225]=='family'].index)
     l2 = list(terrorist_rel_coll.loc[terrorist_rel_coll[1225]=='colleague'].index)
     l3 = list(terrorist_rel_cont.loc[terrorist_rel_cont[1225]=='contact'].index)
@@ -292,28 +314,7 @@ def get_true_labels(A):
     d[list(t.loc[t['Cong'] == 'congregate'].index)] += 30
     d[list(t.loc[t['Cont'] == 'contact'].index)] += 4
     '''
-    d = {}
-    for i in range(851):
-        d[i] = 0
-    for i in list(t.loc[t['Fam'] == 'family'].index):
-        d[i] += 1000
-    for i in list(t.loc[t['Col'] == 'colleague'].index):
-        d[i] += 200
-    for i in list(t.loc[t['Cong'] == 'congregate'].index):
-        d[i] += 30
-    for i in list(t.loc[t['Cont'] == 'contact'].index):
-        d[i] += 4
-    '''
     zero_index = np.where(np.sum(A, axis=0) == 0)[0]
-    d = np.delete(d, zero_index)
-    '''
-    labs = []
-    for i in range(n_nodes):
-        if i not in zero_index:
-            labs.append(d[i])
-
-    labs = np.array(labs)
+    labeledNodes = np.delete(labeledNodes, zero_index)
     
-    labs[labs!=0] = 1
-    '''
-    return d
+    return labeledNodes
