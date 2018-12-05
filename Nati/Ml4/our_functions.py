@@ -247,7 +247,7 @@ def compute_clustering_coefficient(adjacency, node):
     
     return float(clustering_coefficient)
 
-def get_true_labels(A):
+def get_true_labels(A, cat):
     # First we want to get the true labels on the nodes
     file_path1 = '../data/TerroristRel/TerroristRel.edges'
     file_path2 = '../data/TerroristRel/TerroristRel.labels'
@@ -304,5 +304,22 @@ def get_true_labels(A):
     
     labs[labs!=0] = 1
     '''
-    d = [1 if d[i] > 0 else 0 for i in range(d.shape[0])]
-    return d
+    return get_true_l_category(d, cat)
+    #d = [1 if d[i] > 0 else 0 for i in range(d.shape[0])]
+    # return d
+
+def get_true_l_category(d, cat):
+    if cat == 'family':
+        return [1 if str(d[i])[0]=='1' else 0 for i in range(d.shape[0])]
+        
+    elif cat == 'colleague':
+        return [1 if str(d[i])[1]=='2' else 0 for i in range(d.shape[0])]
+    elif cat == 'congregate':
+        return [1 if str(d[i])[2]=='3' else 0 for i in range(d.shape[0])]
+    elif cat == 'contact':
+        return [1 if str(d[i])[3]=='4' else 0 for i in range(d.shape[0])]
+    else:
+        return [1 if d[i] > 0 else 0 for i in range(d.shape[0])]
+    
+    
+    
