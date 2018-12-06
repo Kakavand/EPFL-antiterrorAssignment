@@ -403,10 +403,8 @@ def get_true_labels(A):
     n = list(labels.keys())
     n.sort
     labeledNodes = np.array([labels[i] for i in n])
-    print(labeledNodes.shape)
-    zero_index = np.where(np.sum(A, axis=0) == 0)[0]
-    print(zero_index)
-    labeledNodes = np.delete(labeledNodes, zero_index)
-    print(labeledNodes.shape)
+    #zero_index = np.where(np.sum(A, axis=0) == 0)[0]
+    #labeledNodes = np.delete(labeledNodes, zero_index)
+
     
     return labeledNodes
