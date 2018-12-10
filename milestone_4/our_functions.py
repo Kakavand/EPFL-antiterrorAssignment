@@ -261,16 +261,16 @@ def get_true_labels(A, cat):
     terrorist_rel_labels = pd.read_csv(file_path2, header=None)
 
         # Parse using tab and space delimiters
-    terrorist_rel_coll = pd.read_csv(file_path3, sep='\t|' '', header=None)
+    terrorist_rel_coll = pd.read_csv(file_path3, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
-    terrorist_rel_cong = pd.read_csv(file_path4, sep='\t|' '', header=None)
+    terrorist_rel_cong = pd.read_csv(file_path4, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
-    terrorist_rel_cont = pd.read_csv(file_path5, sep='\t|' '', header=None)
+    terrorist_rel_cont = pd.read_csv(file_path5, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
-    terrorist_rel_fam = pd.read_csv(file_path6, sep='\t|' '', header=None)
+    terrorist_rel_fam = pd.read_csv(file_path6, delim_whitespace = True, header=None, engine='python')
 
     l1 = list(terrorist_rel_fam.loc[terrorist_rel_fam[1225]=='family'].index)
     l2 = list(terrorist_rel_coll.loc[terrorist_rel_coll[1225]=='colleague'].index)
