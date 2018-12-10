@@ -246,7 +246,7 @@ def compute_clustering_coefficient(adjacency, node):
     
     
     return float(clustering_coefficient)
-
+"""
 def get_true_labels(A, cat):
     # First we want to get the true labels on the nodes
     file_path1 = '../data/TerroristRel/TerroristRel.edges'
@@ -322,4 +322,89 @@ def get_true_l_category(d, cat):
         return [1 if d[i] > 0 else 0 for i in range(d.shape[0])]
     
     
+"""
+
+def get_true_labels(A):
+    # First we want to get the true labels on the nodes
+    file_path1 = '../data/TerroristRel/TerroristRel.edges'
+    file_path2 = '../data/TerroristRel/TerroristRel.labels'
+    file_path3 = '../data/TerroristRel/TerroristRel_Colleague.nodes'
+    file_path4 = '../data/TerroristRel/TerroristRel_Congregate.nodes'
+    file_path5 = '../data/TerroristRel/TerroristRel_Contact.nodes'
+    file_path6 = '../data/TerroristRel/TerroristRel_Family.nodes'
+
+    n_nodes = A.shape[0]
     
+    terrorist_rel_labels = pd.read_csv(file_path2, header=None)
+
+        # Parse using tab and space delimiters
+    terrorist_rel_coll = pd.read_csv(file_path3, sep='\t|' '', header=None, engine='python')
+
+        # Parse using tab and space delimiters
+    terrorist_rel_cong = pd.read_csv(file_path4, sep="\s+|\t+", header=None)
+
+        # Parse using tab and space delimiters
+    terrorist_rel_cont = pd.read_csv(file_path5, sep='\t|' '', header=None, engine='python')
+
+        # Parse using tab and space delimiters
+    terrorist_rel_fam = pd.read_csv(file_path6, sep='\t|' '', header=None, engine='python')
+
+    #keep id/label information and rename columns
+    colleague = terrorist_rel_coll[[0, 1225]]
+    family = terrorist_rel_fam[[0, 1225]]
+    congregate = terrorist_rel_cong[[0, 1225]]
+    contact = terrorist_rel_cont[[0, 1225]]
+    
+    #print(colleague.rename)
+    #create table containing all labels for each node
+    colleague = colleague.set_index(0)
+    family = family.set_index(0)
+    congregate = congregate.set_index(0)
+    contact = contact.set_index(0)
+    #join to colleagues dataset since adjacency matrix was constructed based on its node ordering 
+    labeledNodes = colleague.join(family, on=0, lsuffix='_colleague', rsuffix='_family')
+    labeledNodes = labeledNodes.join(congregate, on=0, rsuffix='_congregate')
+    labeledNodes = labeledNodes.join(contact, on=0, lsuffix='_congregate', rsuffix='_contact')
+    labeledNodes.reset_index(level=0, inplace=True)
+    '''
+    colleague = colleague.rename(columns={0: 'url_id', 1225: 'label'})
+    family = family.rename(columns={0: 'url_id', 1225: 'label'})
+    congregate = congregate.rename(columns={0: 'url_id', 1225: 'label'})
+    contact = contact.rename(columns={0: 'url_id', 1225: 'label'})
+    
+    l1 = list(terrorist_rel_fam.loc[terrorist_rel_fam[1225]=='family'].index)
+    l2 = list(terrorist_rel_coll.loc[terrorist_rel_coll[1225]=='colleague'].index)
+    l3 = list(terrorist_rel_cont.loc[terrorist_rel_cont[1225]=='contact'].index)
+    l4 = list(terrorist_rel_cong.loc[terrorist_rel_cong[1225]=='congregate'].index)
+        
+    l_tot = list(range(n_nodes))
+
+
+    t = pd.DataFrame(terrorist_rel_fam.iloc[:,1225], columns=['Nan'])
+    t['Col'] = terrorist_rel_coll.iloc[:, 1225]
+    t['Fam'] = terrorist_rel_fam.iloc[:, 1225]
+    t['Cong'] = terrorist_rel_cong.iloc[:, 1225]
+    t['Cont'] = terrorist_rel_cont.iloc[:, 1225]
+
+    d = np.zeros((n_nodes, 1))
+    d[list(t.loc[t['Fam'] == 'family'].index)] += 1000
+    d[list(t.loc[t['Col'] == 'colleague'].index)] += 200
+    d[list(t.loc[t['Cong'] == 'congregate'].index)] += 30
+    d[list(t.loc[t['Cont'] == 'contact'].index)] += 4
+    '''
+    
+    print(labeledNodes.index)
+    labels = dict()
+    for i in range(len(list(labeledNodes.index))):
+        for relation in [('family',-2), ('congregate',-1), ('colleague',1), ('contact',2)]:
+            if labeledNodes.loc[i, '1225_{}'.format(relation[0])] == relation[0]:
+                labels[i] = relation[1]
+    
+    n = list(labels.keys())
+    n.sort
+    labeledNodes = np.array([labels[i] for i in n])
+    #zero_index = np.where(np.sum(A, axis=0) == 0)[0]
+    #labeledNodes = np.delete(labeledNodes, zero_index)
+
+    
+    return labeledNodes
