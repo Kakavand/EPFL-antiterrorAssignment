@@ -261,16 +261,16 @@ def get_true_labels(A):
     terrorist_rel_labels = pd.read_csv(file_path2, header=None)
 
         # Parse using tab and space delimiters
-    terrorist_rel_coll = pd.read_csv(file_path3, sep='\t|' '', header=None, engine='python')
+    terrorist_rel_coll = pd.read_csv(file_path3, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
-    terrorist_rel_cong = pd.read_csv(file_path4, sep="\s+|\t+", header=None)
+    terrorist_rel_cong = pd.read_csv(file_path4, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
-    terrorist_rel_cont = pd.read_csv(file_path5, sep='\t|' '', header=None, engine='python')
+    terrorist_rel_cont = pd.read_csv(file_path5, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
-    terrorist_rel_fam = pd.read_csv(file_path6, sep='\t|' '', header=None, engine='python')
+    terrorist_rel_fam = pd.read_csv(file_path6, delim_whitespace = True, header=None, engine='python')
 
     #keep id/label information and rename columns
     colleague = terrorist_rel_coll[[0, 1225]]
@@ -279,42 +279,17 @@ def get_true_labels(A):
     contact = terrorist_rel_cont[[0, 1225]]
     
     #create table containing all labels for each node
-    colleague = colleague.set_index('url_id')
-    famility = familty.set_index('url_id')
-    congregate = congregate.set_index('url_id')
-    contact = contact.set_index('url_id')
+    colleague = colleague.set_index(0)
+    family = family.set_index(0)
+    congregate = congregate.set_index(0)
+    contact = contact.set_index(0)
     #join to colleagues dataset since adjacency matrix was constructed based on its node ordering 
-    labeledNodes = colleague.join(family, on='url_id', lsuffix='_colleague', rsuffix='_family')
-    labeledNodes = labeledNodes.join(congregate, on='url_id', rsuffix='_congregate')
-    labeledNodes = labeledNodes.join(contact, on='url_id', lsuffix='_congregate', rsuffix='_contact')
+    labeledNodes = colleague.join(family, on=0, lsuffix='_colleague', rsuffix='_family')
+    labeledNodes = labeledNodes.join(congregate, on=0, lsuffix='_family', rsuffix='_congregate')
+    labeledNodes = labeledNodes.join(contact, on=0, lsuffix='_congregate', rsuffix='_contact')
     labeledNodes.reset_index(level=0, inplace=True)
-    '''
-    colleague = colleague.rename(columns={0: 'url_id', 1225: 'label'})
-    family = family.rename(columns={0: 'url_id', 1225: 'label'})
-    congregate = congregate.rename(columns={0: 'url_id', 1225: 'label'})
-    contact = contact.rename(columns={0: 'url_id', 1225: 'label'})
     
-    l1 = list(terrorist_rel_fam.loc[terrorist_rel_fam[1225]=='family'].index)
-    l2 = list(terrorist_rel_coll.loc[terrorist_rel_coll[1225]=='colleague'].index)
-    l3 = list(terrorist_rel_cont.loc[terrorist_rel_cont[1225]=='contact'].index)
-    l4 = list(terrorist_rel_cong.loc[terrorist_rel_cong[1225]=='congregate'].index)
-        
-    l_tot = list(range(n_nodes))
-
-
-    t = pd.DataFrame(terrorist_rel_fam.iloc[:,1225], columns=['Nan'])
-    t['Col'] = terrorist_rel_coll.iloc[:, 1225]
-    t['Fam'] = terrorist_rel_fam.iloc[:, 1225]
-    t['Cong'] = terrorist_rel_cong.iloc[:, 1225]
-    t['Cont'] = terrorist_rel_cont.iloc[:, 1225]
-
-    d = np.zeros((n_nodes, 1))
-    d[list(t.loc[t['Fam'] == 'family'].index)] += 1000
-    d[list(t.loc[t['Col'] == 'colleague'].index)] += 200
-    d[list(t.loc[t['Cong'] == 'congregate'].index)] += 30
-    d[list(t.loc[t['Cont'] == 'contact'].index)] += 4
-    '''
-    zero_index = np.where(np.sum(A, axis=0) == 0)[0]
-    labeledNodes = np.delete(labeledNodes, zero_index)
+    #zero_index = np.where(np.sum(A, axis=0) == 0)[0]
+    #labeledNodes = np.delete(labeledNodes, zero_index)
     
     return labeledNodes
