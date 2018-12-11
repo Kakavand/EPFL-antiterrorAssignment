@@ -248,20 +248,28 @@ def compute_clustering_coefficient(adjacency, node):
     return float(clustering_coefficient)
 
 def get_true_labels(A):
-    # First we want to get the true labels on the nodes
-    file_path1 = '../data/TerroristRel/TerroristRel.edges'
-    file_path2 = '../data/TerroristRel/TerroristRel.labels'
+    """Return the label of each node in he adjacency matrix A
+    
+    Parameters
+    ----------
+    A: numpy array
+        The (weighted) adjacency matrix of a graph.
+    
+    Returns
+    -------
+    numpy array
+        The numerical label for each node.
+    """
+    
+    # First we want to get the nodes
     file_path3 = '../data/TerroristRel/TerroristRel_Colleague.nodes'
     file_path4 = '../data/TerroristRel/TerroristRel_Congregate.nodes'
     file_path5 = '../data/TerroristRel/TerroristRel_Contact.nodes'
     file_path6 = '../data/TerroristRel/TerroristRel_Family.nodes'
 
     n_nodes = A.shape[0]
-    
-    terrorist_rel_labels = pd.read_csv(file_path2, header=None)
 
         # Parse using tab and space delimiters
-
     terrorist_rel_coll = pd.read_csv(file_path3, delim_whitespace = True, header=None, engine='python')
 
         # Parse using tab and space delimiters
@@ -273,25 +281,24 @@ def get_true_labels(A):
         # Parse using tab and space delimiters
     terrorist_rel_fam = pd.read_csv(file_path6, delim_whitespace = True, header=None, engine='python')
 
-    #keep id/label information and rename columns
+    # keep id/label information
     colleague = terrorist_rel_coll[[0, 1225]]
     family = terrorist_rel_fam[[0, 1225]]
     congregate = terrorist_rel_cong[[0, 1225]]
     contact = terrorist_rel_cont[[0, 1225]]
     
-    #print(colleague.rename)
-    #create table containing all labels for each node
+    # create table containing all labels for each node
     colleague = colleague.set_index(0)
     family = family.set_index(0)
     congregate = congregate.set_index(0)
     contact = contact.set_index(0)
-    #join to colleagues dataset since adjacency matrix was constructed based on its node ordering 
+    
+    # join to colleagues dataset since adjacency matrix was constructed based on its node ordering 
     labeledNodes = colleague.join(family, on=0, lsuffix='_colleague', rsuffix='_family')
     labeledNodes = labeledNodes.join(congregate, on=0, rsuffix='_congregate')
     labeledNodes = labeledNodes.join(contact, on=0, lsuffix='_congregate', rsuffix='_contact')
     labeledNodes.reset_index(level=0, inplace=True)
     
-    print(labeledNodes.index)
     labels = dict()
     for i in range(len(list(labeledNodes.index))):
         for relation in [('family',-2), ('congregate',-1), ('colleague',1), ('contact',2)]:
@@ -301,9 +308,6 @@ def get_true_labels(A):
     n = list(labels.keys())
     n.sort
     labeledNodes = np.array([labels[i] for i in n])
-    #zero_index = np.where(np.sum(A, axis=0) == 0)[0]
-    #labeledNodes = np.delete(labeledNodes, zero_index)
-
     
     return labeledNodes
     
