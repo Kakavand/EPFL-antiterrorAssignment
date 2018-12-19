@@ -324,9 +324,65 @@ def give_names_tonodes(A):
     name_dict = {}
     for idx in range(colleague.shape[0]):
         url = np.array2string(colleague[idx])
+        
         url_split = url.split('#')
         second_name = url_split[2].split("'")[0]
         first_name = url_split[1].split('_http')[0]
+        colleague[idx] = first_name + ";" + second_name + "; node:" + str(idx)
+        
+        # update dictionary where key = name, value = node index
+        if name_dict.get(first_name) == None:
+            name_dict.update({first_name: set([idx])})
+        else:
+            name_dict.get(first_name).update(name_dict.get(first_name).union(set([idx])))
+        
+        if name_dict.get(second_name) == None:
+            name_dict.update({second_name: set([idx])})
+        else:
+            name_dict.get(second_name).update(name_dict.get(second_name).union(set([idx])))
+    
+    zero_index = np.where(np.sum(A, axis=0) == 0)[0]
+    A = np.delete(A, zero_index, axis=0)
+    A = np.delete(A, zero_index, axis=1)
+    colleague = np.delete(colleague, zero_index, axis=0)
+    
+    return colleague, A, name_dict;
+
+
+def give_names_tonodes_dates_based(A):
+    
+    # First we want to get the nodes
+    file_path = '../data/TerroristRel/TerroristRel_Colleague.nodes'
+    # Parse using tab and space delimiters
+    terrorist_rel_coll = pd.read_csv(file_path, delim_whitespace = True, header=None, engine='python')
+    
+    # keep URL information
+    colleague = terrorist_rel_coll[[0]]
+    colleague = np.array(colleague)
+    name_dict = {}
+    for idx in range(colleague.shape[0]):
+        url = np.array2string(colleague[idx])
+        
+        url_split = url.split('http://')[1:]
+        
+        # Get name + information 
+        info1, first_name = url_split[0].split('#')
+       
+        # If it has no name, identify by date
+        if len(first_name) < 2:
+            first_name = info1.split('document')[1]
+        if first_name[-1] == '_':
+            first_name = first_name[:-1]
+            
+        
+        info2, second_name = url_split[1].split('#')
+        # Delete the extra character ']'
+        second_name = second_name.split(']')[0]
+        
+        if len(second_name) < 2:
+            second_name = info2.split('document')[1]
+            
+        second_name = second_name.replace("'", "")
         colleague[idx] = first_name + ";" + second_name + "; node:" + str(idx)
         
         # update dictionary where key = name, value = node index
